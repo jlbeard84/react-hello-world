@@ -4,93 +4,48 @@ import { Square } from "./";
 
 export class Board extends React.Component {
     
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            squares: Array(9).fill(null),
-            xIsNext: true,
-        };
-    }
-    
-    renderSquare(i) {
+    renderSquare(i, isWinningNum) {
         return (
             <Square 
-                value={this.state.squares[i]} 
-                onClick={() => this.handleClick(i)}
+                key={i}
+                isWinningSquare={isWinningNum}
+                value={this.props.squares[i]} 
+                onClick={() => this.props.onClick(i)}
             />
         );
     }
 
-    handleClick(i) {
-        const squares = this.state.squares.slice();
-
-        if (this.calculateWinner(squares) || squares[i]) {
-            return;
-        }
-        
-        squares[i] = this.state.xIsNext ? "X" : "O";
-
-        this.setState({ 
-            squares: squares,
-            xIsNext: !this.state.xIsNext,
-        });
-    }
-
-    calculateWinner(squares) {
-        const lines = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-            [0, 4, 8],
-            [2, 4, 6],
-        ];
-
-        for (let i = 0; i < lines.length; i++) {
-            const [a, b, c] = lines[i];
-
-            if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-                return squares[a];
-            }
-        }
-
-        return null;
-    }
-
     render() {
 
-        const winner = this.calculateWinner(this.state.squares);
-
-        let status;
-
-        if (winner) {
-            status = `Winner: ${winner}`;
-        } else {
-            status = `Next Player: ${this.state.xIsNext ? "X" : "O" }`;
-        }
-
+        const rows = [0, 1, 2];
+        const cols = [0, 1, 2];
+        const winningSquares = this.props.winningSquares;
+        
         return (
             <div>
-            <div className="status">{status}</div>
-            <div className="board-row">
-              {this.renderSquare(0)}
-              {this.renderSquare(1)}
-              {this.renderSquare(2)}
+            {rows.map((rowNum, index) => {
+                return (
+                    <div className="board-row" key={rowNum}>
+                        {cols.map((colNum, index) => {
+                            const boardNum = (3 * rowNum) + colNum;
+                            let isWinningNum = false;
+
+                            if (winningSquares) {
+                                for (let i = 0; i < winningSquares.length; i++) {
+                                    if (boardNum === winningSquares[i]) {
+                                        isWinningNum = true;
+                                    }
+                                }
+                            }
+
+                            return (
+                                this.renderSquare(boardNum, isWinningNum)
+                            );
+                        })}       
+                    </div>
+                );
+            })}
             </div>
-            <div className="board-row">
-              {this.renderSquare(3)}
-              {this.renderSquare(4)}
-              {this.renderSquare(5)}
-            </div>
-            <div className="board-row">
-              {this.renderSquare(6)}
-              {this.renderSquare(7)}
-              {this.renderSquare(8)}
-            </div>
-          </div>
         );
     }
 }
